@@ -1,0 +1,31 @@
+version: "3"
+services:
+  plate_app_postgres:
+    container_name: plate.app.postgres
+    image: postgres:13.2
+    env_file:
+      - env
+
+  plate_app_django:
+    container_name: plate.app.django
+    build:
+      context: .
+      dockerfile: ./tools/Dockerfile
+    env_file:
+      - env
+    volumes:
+      - ./djangoplateapp:/app
+    depends_on:
+      - plate_app_postgres
+
+  plate_app_nginx:
+    container_name: plate.app.nginx
+    build: ./tools/nginx
+    env_file:
+      - env
+    ports:
+      - "2000:2000"
+    volumes:
+      - ./djangoplateapp/public/static:/app/static/
+    depends_on:
+      - plate_app_django
