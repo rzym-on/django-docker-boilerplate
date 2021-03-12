@@ -1,0 +1,29 @@
+name: Build and push to image registry
+
+on:
+  push:
+    branches:
+      - "master"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.REGISTRY_LOGIN }}
+          password: ${{ secrets.REGISTRY_TOKEN }}
+      - name: Build and push
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          tags: user_name/djangoplateapp:latest
+          file: ./tools/Dockerfile
+      - name: Image digest
+        run: echo ${{ steps.docker_build.outputs.digest }}
